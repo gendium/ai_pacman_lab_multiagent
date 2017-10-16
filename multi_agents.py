@@ -75,47 +75,28 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (pacman.py)
 
         successor_game_state = current_game_state.generate_pacman_successor(action)
-        if successor_game_state.is_win():
-        	return sys.maxsize
-        if successor_game_state.is_lose():
-        	return -sys.maxsize-1
         new_pos = successor_game_state.get_pacman_position()
         new_food = successor_game_state.get_food()
         new_ghost_states = successor_game_state.get_ghost_states()
         new_scared_times = [ghost_state.scared_timer for ghost_state in new_ghost_states]
 
         "*** YOUR CODE HERE ***"
+        distance = []
+        food_list = current_game_state.get_food().as_list()
+        pacman_position = list(successor_game_state.get_pacman_position())
 
-        #print(successor_game_state)
-        #print(new_pos)
-        #print(new_food)
-        #print(new_ghost_states)
-        #print(new_scared_times)
-       	#using this right now https://github.com/georgemouse/multiagent/blob/master/multiAgents.py
+        if action == 'Stop':
+        	return -float("inf")
 
-        new_food_as_list = new_food.as_list()
-        print("here", new_food_as_list)
-        list_of_distance = []
-        for find_food in new_food_as_list:
-        	list_of_distance.append(util.manhattan_distance(new_pos, find_food))
-        
-        closest_food_to_pacman = min(list_of_distance)
-        new_food_score = 1/closest_food_to_pacman
-        the_closest_ghost = 0
-        positions_of_ghost = []
-        for this_ghost_state in new_ghost_states:
-        	if this_ghost_state.scared_timer == 0:
-        		positions_of_ghost.append(this_ghost_state.get_position())
-        if positions_of_ghost:
-        	the_closest_ghost = min(util.manhattan_distance(new_pos, ghost_position) for ghost_position in positions_of_ghost)
-        	if the_closest_ghost == 0:
-        		return -sys.maxsize -1
-        else:
-        	return sys.maxsize
+        for ghost_state in new_ghost_states:
+           	if ghost_state.get_position() == tuple(pacman_position) and ghost_state.scared_timer is 0:
+           		return -float("inf")
 
-        scared_score_sum = sum(new_scared_times)
-
-        return successor_game_state.get_score() + new_food_score/the_closest_ghost + scared_score_sum
+        for food in food_list:
+	        x = -1*abs(food[0] - pacman_position[0])
+	        y = -1*abs(food[1] - pacman_position[1])
+	        distance.append(x+y) 
+        return max(distance)
 
 def score_evaluation_function(current_game_state):
     """

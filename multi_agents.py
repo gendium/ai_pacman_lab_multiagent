@@ -151,7 +151,49 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raise_not_defined()
+        current_depth = 0
+        current_agent_index = 0
+        current_value = self.get_minimax_value(game_state, current_agent_index, current_depth)
+        return current_value[0]
+        
+    def get_minimax_value(self, game_state, current_agent_index, current_depth):
+    	if current_agent_index >=game_state.get_num_agents():
+    		current_agent_index = 0
+    		current_depth = current_depth + 1
+
+    	if current_depth == self.depth:
+    		return self.evaluation_function(game_state)
+    	if current_agent_index == 0:
+    		return self.get_min_or_max_value(game_state, current_agent_index, current_depth, True)
+    	else:
+    		return self.get_min_or_max_value(game_state, current_agent_index, current_depth, False)
+
+
+    def get_min_or_max_value(self, game_state, current_agent_index, current_depth, min_or_max):
+    	if(min_or_max):
+    		value = ("unknown", -1*float("inf"))
+    	else:
+    		value = ("unknown", float("inf"))
+    	if not game_state.get_legal_actions(current_agent_index):
+    		return self.evaluation_function(game_state)
+    	for action in game_state.get_legal_actions(current_agent_index):
+    		if action == "Stop":
+    			continue
+
+    	return_value = (game_state.generate_successor(current_agent_index, action), current_agent_index + 1, current_depth)
+
+    	if type(return_value) is tuple:
+    		return_value = return_value[1]
+    	if(min_or_max):
+    		value_new = max(value[1], return_value)
+    	else:
+    		value_new = min(value[1], return_value)
+    	if value_new is not value[1]:
+    		value = (action, value_new)
+    	return value
+    	
+
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """

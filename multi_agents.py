@@ -128,6 +128,11 @@ class MultiAgentSearchAgent(Agent):
         self.evaluation_function = util.lookup(eval_fn, globals())
         self.depth = int(depth)
 
+    def is_terminal_state(self, state, depth, agent):
+    	return depth == self.depth or state.is_win() or state.is_lose() or state.get_legal_actions(agent) == 0
+    def is_pacman(self, state, agent):
+    	return agent % state.get_num_agents() == 0
+
 class MinimaxAgent(MultiAgentSearchAgent):
     """
       Your minimax agent (question 2)
@@ -151,46 +156,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        current_depth = 0
-        current_agent_index = 0
-        current_value = self.get_minimax_value(game_state, current_agent_index, current_depth)
-        return current_value[0]
-        
-    def get_minimax_value(self, game_state, current_agent_index, current_depth):
-    	if current_agent_index >=game_state.get_num_agents():
-    		current_agent_index = 0
-    		current_depth = current_depth + 1
-
-    	if current_depth == self.depth:
-    		return self.evaluation_function(game_state)
-    	if current_agent_index == 0:
-    		return self.get_min_or_max_value(game_state, current_agent_index, current_depth, True)
-    	else:
-    		return self.get_min_or_max_value(game_state, current_agent_index, current_depth, False)
+       
+        return max(game_state.get_legal_actions(0), key = lambda x: self.mini_max(game_state.generate_successor(0,x),0,1))
 
 
-    def get_min_or_max_value(self, game_state, current_agent_index, current_depth, min_or_max):
-    	if(min_or_max):
-    		value = ("unknown", -1*float("inf"))
-    	else:
-    		value = ("unknown", float("inf"))
-    	if not game_state.get_legal_actions(current_agent_index):
-    		return self.evaluation_function(game_state)
-    	for action in game_state.get_legal_actions(current_agent_index):
-    		if action == "Stop":
-    			continue
-
-    	return_value = (game_state.generate_successor(current_agent_index, action), current_agent_index + 1, current_depth)
-
-    	if type(return_value) is tuple:
-    		return_value = return_value[1]
-    	if(min_or_max):
-    		value_new = max(value[1], return_value)
-    	else:
-    		value_new = min(value[1], return_value)
-    	if value_new is not value[1]:
-    		value = (action, value_new)
-    	return value
+    def mini_max(self,state,depth, agent):
+    	if agent == state.get_num_agents():
+    		return self.mini_max(state, depth + 1, 0)
+    	if self.is_terminal_state(state, depth, agent):
+    		return self.evaluation_function(state)
+    	successors = (
+    		self.mini_max(state.generate_successor(agent, action), depth, agent + 1)
+    		for action in state.get_legal_actions(agent)
+    		)
+    	return (max if self.is_pacman(state, agent)else min)(successors)
     	
 
 

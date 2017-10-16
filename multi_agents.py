@@ -220,7 +220,34 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raise_not_defined()
+        return max(game_state.get_legal_actions(0), 
+          key = expectimax(game_state.generate_successor(0, x), 0, 1) )
+
+    def expectimax(self, state, depth, agent):
+      if agent == state.get_num_agents(): # if agent is pacman
+        return self.expectimax(state, depth + 1, 0) #increase depth
+      
+      if self.is_terminal(state, depth, agent): # if leaf node
+        return self.evaluation_function(state) #evaluate
+      
+      successors = [
+        self.expectimax(state.generate_successor(agent, action), depth, agent + 1)
+        for action in state.get_legal_actions(agent)
+        ]
+      # find the best move for pacman
+      if agent == state.get_num_agents():
+        return max(successors)
+      # average ghost moves
+      else:
+        return sum(successors)/len(successors)
+
+    def get_max(self, ):
+      pass
+
+    def get_expected():
+      pass
+
+    def evaluate_terminal_node():
 
 def better_evaluation_function(current_game_state):
     """

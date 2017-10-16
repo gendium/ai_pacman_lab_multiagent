@@ -180,16 +180,16 @@ class MinimaxAgent(MultiAgentSearchAgent):
     		if action == "Stop":
     			continue
 
-    	return_value = (game_state.generate_successor(current_agent_index, action), current_agent_index + 1, current_depth)
-
-    	if type(return_value) is tuple:
-    		return_value = return_value[1]
-    	if(min_or_max):
-    		value_new = max(value[1], return_value)
-    	else:
-    		value_new = min(value[1], return_value)
-    	if value_new is not value[1]:
-    		value = (action, value_new)
+	    	return_value = (game_state.generate_successor(current_agent_index, action), current_agent_index + 1, current_depth)
+	    	value_new = 0
+	    	if type(return_value) is tuple:
+	    		return_value = return_value[1]
+	    	if(min_or_max):
+	    		value_new = max(value[1], return_value)
+	    	else:
+	    		value_new = min(value[1], return_value)
+	    	if value_new is not value[1]:
+	    		value = (action, value_new)
     	return value
     	
 

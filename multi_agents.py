@@ -183,8 +183,43 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
           Returns the minimax action using self.depth and self.evaluation_function
         """
-        "*** YOUR CODE HERE ***"
-        util.raise_not_defined()
+        alpha = float("-inf")
+        beta = float("inf")
+        current_depth = 0
+        current_agent = 0
+        _,action = checker_for_alpha_beta(game_state, current_depth, current_agent, alpha, beta)
+        return action
+    
+    def checker_for_alpha_beta(self, game_state, current_depth, agent, alpha, beta):
+        if agent == game_state.get_num_agents():
+            current_depth = current_depth + 1
+            agent = 0
+
+        if self.is_terminal_state(game_state, current_depth, agent):
+            return self.evaluation_function(game_state)
+        if self.is_pacman(game_state, agent):
+            return get_needed_value(game_state, current_depth, agent, alpha, beta, float('-inf'), max)
+        else:
+            return get_needed_value(game_state, current_depth, agent, alpha, beta, float('inf'), min)
+
+    def get_needed_value(self, game_state, current_depth, agent, alpha, beta, extreme, this_type):
+        best_score_possible = extreme
+        best_possible_action = None
+
+        for action in game_state.get_legal_actions(agent):
+            successor = game_state.generate_successor(agent, action)
+            score = checker_for_alpha_beta(successor, current_depth, agent + 1, alpha, beta)
+            best_score_possible, best_possible_action = this_type((best_score_possible, best_possible_action), (score[1], action))
+
+            if self.is_pacman(game_state, agent):
+                if best_score_possible > beta:
+                    return best_score_possible, best_possible_action
+                alpha = this_type(alpha, best_score_possible)
+            else:
+                if best_score_possible < alpha:
+                    return best_score_possible, best_possible_action
+                beta = this_type(beta, best_score_possible)
+        return best_score_possible, best_possible_action
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """

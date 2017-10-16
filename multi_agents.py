@@ -160,6 +160,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
     	if current_agent_index >=game_state.get_num_agents():
     		current_agent_index = 0
     		current_depth = current_depth + 1
+    	print("current_depth:", current_depth)
+
 
     	if current_depth == self.depth:
     		return self.evaluation_function(game_state)
@@ -170,7 +172,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
 
     def get_min_or_max_value(self, game_state, current_agent_index, current_depth, min_or_max):
-    	if(min_or_max):
+    	if min_or_max:
     		value = ("unknown", -1*float("inf"))
     	else:
     		value = ("unknown", float("inf"))

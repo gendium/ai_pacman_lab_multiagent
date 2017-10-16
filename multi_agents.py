@@ -187,7 +187,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         beta = float("inf")
         current_depth = 0
         current_agent = 0
-        _,action = checker_for_alpha_beta(game_state, current_depth, current_agent, alpha, beta)
+        _,action = self.checker_for_alpha_beta(game_state, current_depth, current_agent, alpha, beta)
         return action
     
     def checker_for_alpha_beta(self, game_state, current_depth, agent, alpha, beta):
@@ -198,9 +198,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         if self.is_terminal_state(game_state, current_depth, agent):
             return self.evaluation_function(game_state)
         if self.is_pacman(game_state, agent):
-            return get_needed_value(game_state, current_depth, agent, alpha, beta, float('-inf'), max)
+            return self.get_needed_value(game_state, current_depth, agent, alpha, beta, float("-inf"), max)
         else:
-            return get_needed_value(game_state, current_depth, agent, alpha, beta, float('inf'), min)
+            return self.get_needed_value(game_state, current_depth, agent, alpha, beta, float("inf"), min)
 
     def get_needed_value(self, game_state, current_depth, agent, alpha, beta, extreme, this_type):
         best_score_possible = extreme
@@ -208,8 +208,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         for action in game_state.get_legal_actions(agent):
             successor = game_state.generate_successor(agent, action)
-            score = checker_for_alpha_beta(successor, current_depth, agent + 1, alpha, beta)
-            best_score_possible, best_possible_action = this_type((best_score_possible, best_possible_action), (score[1], action))
+            _,score = self.checker_for_alpha_beta(successor, current_depth, agent + 1, alpha, beta)
+            best_score_possible, best_possible_action = this_type((best_score_possible, best_possible_action), (score, action))
 
             if self.is_pacman(game_state, agent):
                 if best_score_possible > beta:

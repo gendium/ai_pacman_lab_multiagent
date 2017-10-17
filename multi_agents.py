@@ -226,10 +226,46 @@ def better_evaluation_function(current_game_state):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION: The evaluation function considers the current score of a state
+        and factors in the distance to a ghost, an edible ghost, and the closest food
+        dot. If and edible ghost is nearby and is scared for long enough to get to, then
+        going for that ghost is greatly incentivized as it adds alot of points.  If 
+        there is any ghost nearby it deincentivizes that state, tempered by the distance
+        of the ghost. The function also checks the closest food pellet. The closer the 
+        closest food pellet the more incentivization. These incentivizers of ghosts,
+        edible ghosts and closest food dot are all summed with the score. That value
+        is then returned. 
     """
     "*** YOUR CODE HERE ***"
-    util.raise_not_defined()
+    pos = current_game_state.get_pacman_position()
+    food = current_game_state.get_food()
+    ghost_states = current_game_state.get_ghost_states()
+
+    food_weight = 1.0
+    ghost_weight = 1.0
+    edible_ghost_weight = 7.0
+
+    # because the score at each state matters
+    value = current_game_state.get_score()
+
+    # distance to ghosts
+    ghost_value = 0
+    for ghost in ghost_states:
+      distance_to_ghost = manhattan_distance(pos, ghost.get_position())
+      if distance_to_ghost > 0:
+        if ghost.scared_timer > distance_to_ghost: # if ghost scared and close enough to get
+          ghost_value += edible_ghost_weight / distance_to_ghost # eat it
+        else: # else avoid ghost
+          ghost_value -= ghost_weight / distance_to_ghost
+    value += ghost_value
+
+    # distance to closest food
+    distances_to_food = [manhattan_distance(pos, x) for x in food.as_list()]
+    if len(distances_to_food): #if food is found
+      value += food_weight / min(distances_to_food)
+
+    return value
+
 
 # Abbreviation
 better = better_evaluation_function

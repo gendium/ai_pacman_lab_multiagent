@@ -1,4 +1,23 @@
-"""multi_agents.py
+"""
+Author: Sean Egger, Alec Rulev
+Class: CSI-480-01
+Assignment: Multi Agent Pacman Programming Assignment
+Date Assigned: Tuesday
+Due Date: Monday 11:59
+ 
+Description:
+A pacman ai program
+ 
+Certification of Authenticity: 
+I certify that this is entirely my own work, except where I have given 
+fully-documented references to the work of others. I understand the definition 
+and consequences of plagiarism and acknowledge that the assessor of this 
+assignment may, for the purpose of assessing this assignment:
+- Reproduce this assignment and provide a copy to another member of academic
+- staff; and/or Communicate a copy of this assignment to a plagiarism checking
+- service (which may then retain a copy of this assignment on its database for
+- the purpose of future plagiarism checking)
+multi_agents.py
 
 Champlain College CSI-480, Fall 2017
 The following code was adapted by Joshua Auerbach (jauerbach@champlain.edu)
@@ -184,39 +203,51 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         beta = float('inf')
         current_depth = 0
         current_agent = 0
-        _,action = self.checker_for_alpha_beta(game_state,0,0)
-        return action
-    
-    def checker_for_alpha_beta(self, game_state, current_depth, agent, alpha = float("-inf"), beta = float("inf")):
-        if agent == game_state.get_num_agents():
+        value = self.valuation(game_state, current_agent, current_depth, alpha, beta)
+        return value[0]
+    def valuation(self, game_state, current_agent, current_depth, alpha, beta):
+        if current_agent >= game_state.get_num_agents():
+            current_agent = 0
             current_depth = current_depth + 1
-            agent = 0
-
-        if self.is_terminal_state(game_state, current_depth, agent):
-            return 	self.evaluation_function(game_state)
-        if self.is_pacman(game_state, agent):
-            return self.get_needed_value(game_state, current_depth, agent, alpha, beta, float('-inf'), max)
+        if self.is_terminal_state(game_state, current_depth, current_agent):
+            return self.evaluation_function(game_state)
+        if self.is_pacman(game_state, current_agent):
+            return self.get_max_or_min_value(game_state, current_agent, current_depth, alpha, beta, True)
         else:
-            return self.get_needed_value(game_state, current_depth, agent, alpha, beta, float('inf'), min)
+            return self.get_max_or_min_value(game_state, current_agent, current_depth, alpha, beta, False)
 
-    def get_needed_value(self, game_state, current_depth, agent, alpha, beta, extreme, this_type):
-        best_score_possible = extreme
-        best_possible_action = None
+    def get_max_or_min_value(self, game_state, current_agent, current_depth, alpha, beta, is_max):
+        if is_max:
+            this_value = ("unknown", float("-inf"))
+        else:
+            this_value = ("unknown", float("inf"))
 
-        for action in game_state.get_legal_actions(agent):
-            successor = game_state.generate_successor(agent, action)
-            score,_ = self.checker_for_alpha_beta(successor, current_depth, agent + 1, alpha, beta)
-            best_score_possible, best_possible_action = this_type((best_score_possible, best_possible_action), (score, action))
-
-            if self.is_pacman(game_state, agent):
-                if best_score_possible > beta:
-                    return (best_score_possible, best_possible_action)
-                alpha = this_type(alpha, best_score_possible)
+        if not game_state.get_legal_actions(current_agent):
+            return self.evaluation_function(game_state)
+        for action in game_state.get_legal_actions(current_agent):
+            if action == "Stop":
+                continue
+            return_value = self.valuation(game_state.generate_successor(current_agent, action), current_agent + 1, current_depth, alpha, beta )
+            if type(return_value) is tuple:
+                return_value = return_value[1]
+            value_new = None
+            if is_max:
+                value_new = max(this_value[1], return_value)
             else:
-                if best_score_possible < alpha:
-                    return (best_score_possible, best_possible_action)
-                beta = this_type(beta, best_score_possible)
-        return (best_score_possible, best_possible_action)
+                value_new = min(this_value[1], return_value)
+
+            if value_new is not this_value[1]:
+                this_value = (action, value_new)
+
+            if is_max:
+                if this_value[1] > beta:
+                   return this_value
+                alpha = max(alpha, this_value[1])
+            else:
+                if this_value[1] < alpha:
+                    return this_value
+                beta = min(beta, this_value[1])
+        return this_value
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """

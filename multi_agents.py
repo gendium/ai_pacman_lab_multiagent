@@ -75,10 +75,7 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (pacman.py)
 
         successor_game_state = current_game_state.generate_pacman_successor(action)
-        new_pos = successor_game_state.get_pacman_position()
-        new_food = successor_game_state.get_food()
         new_ghost_states = successor_game_state.get_ghost_states()
-        new_scared_times = [ghost_state.scared_timer for ghost_state in new_ghost_states]
 
         "*** YOUR CODE HERE ***"
         distance = []
@@ -183,24 +180,24 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
           Returns the minimax action using self.depth and self.evaluation_function
         """
-        alpha = float("-inf")
-        beta = float("inf")
+        alpha = float('-inf')
+        beta = float('inf')
         current_depth = 0
         current_agent = 0
-        _,action = self.checker_for_alpha_beta(game_state, current_depth, current_agent, alpha, beta)
+        _,action = self.checker_for_alpha_beta(game_state,0,0)
         return action
     
-    def checker_for_alpha_beta(self, game_state, current_depth, agent, alpha, beta):
+    def checker_for_alpha_beta(self, game_state, current_depth, agent, alpha = float("-inf"), beta = float("inf")):
         if agent == game_state.get_num_agents():
             current_depth = current_depth + 1
             agent = 0
 
         if self.is_terminal_state(game_state, current_depth, agent):
-            return self.evaluation_function(game_state)
+            return 	self.evaluation_function(game_state)
         if self.is_pacman(game_state, agent):
-            return self.get_needed_value(game_state, current_depth, agent, alpha, beta, float("-inf"), max)
+            return self.get_needed_value(game_state, current_depth, agent, alpha, beta, float('-inf'), max)
         else:
-            return self.get_needed_value(game_state, current_depth, agent, alpha, beta, float("inf"), min)
+            return self.get_needed_value(game_state, current_depth, agent, alpha, beta, float('inf'), min)
 
     def get_needed_value(self, game_state, current_depth, agent, alpha, beta, extreme, this_type):
         best_score_possible = extreme
@@ -208,18 +205,18 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         for action in game_state.get_legal_actions(agent):
             successor = game_state.generate_successor(agent, action)
-            _,score = self.checker_for_alpha_beta(successor, current_depth, agent + 1, alpha, beta)
+            score,_ = self.checker_for_alpha_beta(successor, current_depth, agent + 1, alpha, beta)
             best_score_possible, best_possible_action = this_type((best_score_possible, best_possible_action), (score, action))
 
             if self.is_pacman(game_state, agent):
                 if best_score_possible > beta:
-                    return best_score_possible, best_possible_action
+                    return (best_score_possible, best_possible_action)
                 alpha = this_type(alpha, best_score_possible)
             else:
                 if best_score_possible < alpha:
-                    return best_score_possible, best_possible_action
+                    return (best_score_possible, best_possible_action)
                 beta = this_type(beta, best_score_possible)
-        return best_score_possible, best_possible_action
+        return (best_score_possible, best_possible_action)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
